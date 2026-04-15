@@ -1,0 +1,141 @@
+# student-fitness-tracker
+import csv
+from datetime import datetime
+import os
+
+# File to store data
+DATA_FILE = "fitness_log.csv"
+
+def load_today_data():
+    """Load today's fitness data"""
+    today = datetime.now().strftime("%Y-%m-%d")
+    
+    if not os.path.exists(DATA_FILE):
+        return {"date": today, "steps": 0, "water": 0, "exercise": 0, "fruits": 0}
+    
+    with open(DATA_FILE, "r") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            if row["date"] == today:
+                return row
+    
+    return {"date": today, "steps": 0, "water": 0, "exercise": 0, "fruits": 0}
+
+def save_data(data):
+    """Save fitness data"""
+    today = datetime.now().strftime("%Y-%m-%d")
+    all_data = []
+    
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row["date"] != today:
+                    all_data.append(row)
+    
+    all_data.append(data)
+    
+    with open(DATA_FILE, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=["date", "steps", "water", "exercise", "fruits"])
+        writer.writeheader()
+        writer.writerows(all_data)
+
+def show_menu(data):
+    """Display menu"""
+    print("\n" + "="*40)
+    print("🏃 STUDENT FITNESS TRACKER 🏃")
+    print("="*40)
+    print(f"📅 Today: {data['date']}\n")
+    print(f"👟 Steps: {data['steps']} steps")
+    print(f"💧 Water: {data['water']} cups")
+    print(f"🏅 Exercise: {data['exercise']} minutes")
+    print(f"🍎 Fruits/Veggies: {data['fruits']} servings")
+    print("\n" + "="*40)
+    print("What do you want to update?")
+    print("1. Add steps")
+    print("2. Add water (cups)")
+    print("3. Add exercise (minutes)")
+    print("4. Add fruits/veggies (servings)")
+    print("5. View goals")
+    print("6. Exit")
+    print("="*40)
+
+def show_goals():
+    """Show daily health goals"""
+    print("\n🎯 DAILY HEALTH GOALS 🎯")
+    print("• Steps: 10,000 steps")
+    print("• Water: 8 cups")
+    print("• Exercise: 60 minutes")
+    print("• Fruits/Veggies: 5 servings")
+
+def check_progress(data):
+    """Check progress toward goals"""
+    print("\n📊 YOUR PROGRESS TODAY 📊")
+    
+    steps_pct = (int(data["steps"]) / 10000) * 100
+    water_pct = (int(data["water"]) / 8) * 100
+    exercise_pct = (int(data["exercise"]) / 60) * 100
+    fruits_pct = (int(data["fruits"]) / 5) * 100
+    
+    print(f"Steps: {steps_pct:.0f}% ({data['steps']}/10,000)")
+    print(f"Water: {water_pct:.0f}% ({data['water']}/8)")
+    print(f"Exercise: {exercise_pct:.0f}% ({data['exercise']}/60)")
+    print(f"Fruits/Veggies: {fruits_pct:.0f}% ({data['fruits']}/5)")
+
+def main():
+    """Main program"""
+    while True:
+        data = load_today_data()
+        show_menu(data)
+        
+        choice = input("\nEnter your choice (1-6): ").strip()
+        
+        if choice == "1":
+            try:
+                steps = int(input("How many steps did you take? "))
+                data["steps"] = str(int(data["steps"]) + steps)
+                save_data(data)
+                print(f"✅ Added {steps} steps!")
+            except ValueError:
+                print("❌ Please enter a number!")
+        
+        elif choice == "2":
+            try:
+                water = int(input("How many cups of water did you drink? "))
+                data["water"] = str(int(data["water"]) + water)
+                save_data(data)
+                print(f"✅ Added {water} cups of water!")
+            except ValueError:
+                print("❌ Please enter a number!")
+        
+        elif choice == "3":
+            try:
+                exercise = int(input("How many minutes did you exercise? "))
+                data["exercise"] = str(int(data["exercise"]) + exercise)
+                save_data(data)
+                print(f"✅ Added {exercise} minutes of exercise!")
+            except ValueError:
+                print("❌ Please enter a number!")
+        
+        elif choice == "4":
+            try:
+                fruits = int(input("How many servings of fruits/veggies? "))
+                data["fruits"] = str(int(data["fruits"]) + fruits)
+                save_data(data)
+                print(f"✅ Added {fruits} servings!")
+            except ValueError:
+                print("❌ Please enter a number!")
+        
+        elif choice == "5":
+            show_goals()
+            check_progress(data)
+        
+        elif choice == "6":
+            print("\n👋 Great job taking care of your health! See you tomorrow!")
+            break
+        
+        else:
+            print("❌ Please enter 1-6!")
+
+if __name__ == "__main__":
+    main()
